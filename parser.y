@@ -4332,13 +4332,9 @@ DropViewStmt:
 	}
 
 DropUserStmt:
-	"DROP" "USER" UsernameList
+	"DROP" "USER" IfExists UsernameList
 	{
-		$$ = &ast.DropUserStmt{IsDropRole: false, IfExists: false, UserList: $3.([]*auth.UserIdentity)}
-	}
-|	"DROP" "USER" "IF" "EXISTS" UsernameList
-	{
-		$$ = &ast.DropUserStmt{IsDropRole: false, IfExists: true, UserList: $5.([]*auth.UserIdentity)}
+		$$ = &ast.DropUserStmt{IsDropRole: false, IfExists: $3.(bool), UserList: $3.([]*auth.UserIdentity)}
 	}
 
 DropRoleStmt:
