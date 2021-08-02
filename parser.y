@@ -4322,39 +4322,26 @@ OptTemporary:
 	}
 
 DropViewStmt:
-	"DROP" "VIEW" TableNameList RestrictOrCascadeOpt
+	"DROP" "VIEW" IfExists TableNameList RestrictOrCascadeOpt
 	{
-		$$ = &ast.DropTableStmt{Tables: $3.([]*ast.TableName), IsView: true}
-	}
-|	"DROP" "VIEW" "IF" "EXISTS" TableNameList RestrictOrCascadeOpt
-	{
-		$$ = &ast.DropTableStmt{IfExists: true, Tables: $5.([]*ast.TableName), IsView: true}
+		$$ = &ast.DropTableStmt{IfExists: $3.(bool), Tables: $4.([]*ast.TableName), IsView: true}
 	}
 
 DropUserStmt:
 	"DROP" "USER" IfExists UsernameList
 	{
-		$$ = &ast.DropUserStmt{IsDropRole: false, IfExists: $3.(bool), UserList: $3.([]*auth.UserIdentity)}
+		$$ = &ast.DropUserStmt{IsDropRole: false, IfExists: $3.(bool), UserList: $4.([]*auth.UserIdentity)}
 	}
 
 DropRoleStmt:
-	"DROP" "ROLE" RolenameList
+	"DROP" "ROLE" IfExists RolenameList
 	{
 		tmp := make([]*auth.UserIdentity, 0, 10)
-		roleList := $3.([]*auth.RoleIdentity)
+		roleList := $4.([]*auth.RoleIdentity)
 		for _, r := range roleList {
 			tmp = append(tmp, &auth.UserIdentity{Username: r.Username, Hostname: r.Hostname})
 		}
-		$$ = &ast.DropUserStmt{IsDropRole: true, IfExists: false, UserList: tmp}
-	}
-|	"DROP" "ROLE" "IF" "EXISTS" RolenameList
-	{
-		tmp := make([]*auth.UserIdentity, 0, 10)
-		roleList := $5.([]*auth.RoleIdentity)
-		for _, r := range roleList {
-			tmp = append(tmp, &auth.UserIdentity{Username: r.Username, Hostname: r.Hostname})
-		}
-		$$ = &ast.DropUserStmt{IsDropRole: true, IfExists: true, UserList: tmp}
+		$$ = &ast.DropUserStmt{IsDropRole: true, IfExists: $3.(bool), UserList: tmp}
 	}
 
 DropStatsStmt:
